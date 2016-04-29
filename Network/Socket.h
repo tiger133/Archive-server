@@ -5,7 +5,7 @@
 #ifndef UNTITLED_SOCKET_H
 #define UNTITLED_SOCKET_H
 
-namespace Modules
+namespace Network
 {
     class Socket
     {

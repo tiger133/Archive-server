@@ -4,7 +4,7 @@
 
 #include "Connection.h"
 
-Modules::Connection::Connection(Modules::Socket socket) {
+Network::Connection::Connection(Network::Socket socket) {
 
 }
 

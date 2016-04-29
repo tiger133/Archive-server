@@ -3,3 +3,18 @@
 //
 
 #include "CommandLine.h"
+
+
+View::CommandLine::CommandLine(Sever &server)
+{
+    cout<<"Archive server CommandLine 2.0"<<endl;
+    string command;
+    while(true)
+    {
+        cout<<EncourageSign;
+        cin>>command;
+
+        if(command.compare("shutdown")==0)break;
+    }
+}
+

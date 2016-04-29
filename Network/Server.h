@@ -9,7 +9,7 @@
 #include <memory>
 #include "Connection.h"
 
-namespace Modules
+namespace Network
 {
     class Server
     {
@@ -17,7 +17,7 @@ namespace Modules
         Server(int port);
         void start();
         void stop();
-        void setConnectListener(std::Function<void(std::shared_ptr<Connection> & connection));
+        void setConnectListener(std::function<void(std::shared_ptr<Connection>&)> connectListener);
     };
 
 

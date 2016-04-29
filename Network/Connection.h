@@ -5,10 +5,9 @@
 #ifndef UNTITLED_CONNECTION_H
 #define UNTITLED_CONNECTION_H
 
-#include "Server.h"
 #include "Socket.h"
 
-namespace Modules
+namespace Network
 {
     class Connection
     {
