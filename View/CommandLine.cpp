@@ -14,7 +14,11 @@ View::CommandLine::CommandLine(Sever &server)
         cout<<EncourageSign;
         std::getline(cin,command);
         if(command.compare("shutdown")==0)
+        {
+            server.stop();
             break;
+        }
+
     }
 }
 
