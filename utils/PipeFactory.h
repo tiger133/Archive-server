@@ -6,15 +6,16 @@
 #define UNTITLED_PIPEWRAPPER_H
 
 #include <utility>
+#include "OutputPipe.h"
+#include "InputPipe.h"
 
 namespace Utils
 {
 
-    class Pipe {
+    class PipeFactory {
+        PipeFactory(){};
     public:
-        std::pair<int,int> createPipe();
-        void closeChild();
-        void closeParent();
+        static std::pair<std::shared_ptr<InputPipe >, std::shared_ptr<OutputPipe >> createPipe();
     };
 }
 
