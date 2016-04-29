@@ -11,7 +11,7 @@ using CommandLine = View::CommandLine;
 int main() {
 
     Server server(1252);
-    server.setConnectListener([](std::shared_ptr<Connection> x){
+    server.setConnectListener([](std::shared_ptr<Connection>& x){
 
     });
 

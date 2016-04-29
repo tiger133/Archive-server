@@ -11,6 +11,10 @@ namespace Network
     {
     public:
         Socket();
+        void bind();
+        void listen();
+        void connect();
+
     };
 
 }

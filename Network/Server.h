@@ -8,6 +8,7 @@
 #include <functional>
 #include <memory>
 #include "Connection.h"
+#include <thread>
 
 namespace Network
 {
@@ -18,6 +19,11 @@ namespace Network
         void start();
         void stop();
         void setConnectListener(std::function<void(std::shared_ptr<Connection>&)> connectListener);
+        ~Server();
+    private:
+        std::thread * serverThread;
+        std::function<void(std::shared_ptr<Connection>&)> listener;
+        void run() const;
     };
 
 

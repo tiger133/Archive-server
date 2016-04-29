@@ -12,9 +12,9 @@ View::CommandLine::CommandLine(Sever &server)
     while(true)
     {
         cout<<EncourageSign;
-        cin>>command;
-
-        if(command.compare("shutdown")==0)break;
+        std::getline(cin,command);
+        if(command.compare("shutdown")==0)
+            break;
     }
 }
 
