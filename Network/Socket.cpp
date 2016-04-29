@@ -47,6 +47,28 @@ Network::Socket::~Socket() {
         throw std::runtime_error("Cannot close a socket");
 }
 
+int Network::Socket::getDescriptor() {
+    return descriptor;
+}
+
+Network::Socket::Socket(int desc, sockaddr_in in) : descriptor(desc) , sockaddrIn(in){
+
+}
+
+ssize_t Network::Socket::recv(void *buff, size_t len, int flag) {
+
+    return ::recv(descriptor,buff,len,flag);
+}
+ssize_t Network::Socket::send(void *buff, size_t len, int flag) {
+    return ::send(descriptor,buff,len,flag);
+}
+
+
+
+
+
+
+
 
 
 

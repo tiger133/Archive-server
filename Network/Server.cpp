@@ -5,6 +5,8 @@
 #include <iostream>
 #include <unistd.h>
 #include <cstring>
+#include <sys/socket.h>
+
 #include "Server.h"
 
 Network::Server::Server(int port) {
@@ -37,12 +39,13 @@ void Network::Server::run() {
     fd_set working_set;
     FD_ZERO(&master_set);
     FD_SET(inputPipe->getDescriptor(),&master_set);
-    int max_sd = inputPipe->getDescriptor();
-    char * buff = new char[1];
+    FD_SET(serverSocket.getDescriptor(),&master_set);
+    int max_sd = std::max(inputPipe->getDescriptor(),serverSocket.getDescriptor());
+
     bool running = true;
     while(running)
     {
-        memcpy(&working_set,&master_set,sizeof(master_set));
+        memcpy(&working_set, &master_set, sizeof(master_set));
         int result = select(max_sd+1,&working_set,NULL,NULL,(struct timeval*)0);
         if(result < 0)
         {
@@ -56,19 +59,33 @@ void Network::Server::run() {
             if(FD_ISSET(i,&working_set))
             {
                 desc_ready = -1;
-            }
+                if(i == inputPipe->getDescriptor())
+                {
+                    std::cout<<"Server is closing..."<< std::endl;
+                    running = false;
+                }
+                if(i == serverSocket.getDescriptor())
+                {
+                    int client_desc;
+                    do {
 
-            if(i == inputPipe->getDescriptor())
-            {
-                std::cout<<"Server is closing..."<< std::endl;
-                running = false;
-            }
+                        struct sockaddr_in  cli_addr;
+                        bzero((char *) &cli_addr, sizeof(cli_addr));
 
+                        client_desc = accept(serverSocket.getDescriptor(), (struct sockaddr *) &cli_addr,
+                                             (socklen_t *) sizeof(cli_addr));
+                        if (client_desc < 0) {
+                            std::cout << "Accept failed" << std::endl;
+                        }
+
+                        //We have a client descriptor so we can create a thread and start the logic.
+                        createConnection(client_desc,cli_addr);
+
+                        max_sd = std::max(max_sd,client_desc);
+                    }while(client_desc != -1);
+                }
+            }
         }
-
-
-
-        sleep(1);
     }
 
 
@@ -77,6 +94,22 @@ void Network::Server::run() {
 Network::Server::~Server() {
     serverThread->join();
 }
+
+void Network::Server::createConnection(int desc, sockaddr_in in) {
+
+    PipePair p = PipeFactory::createPipe();
+   // Connection x(new Socket(desc,in),p.first);
+   // auto connection = new Connection(new Socket(desc,in),p.first);
+
+    //Register
+
+   /* std::thread t([&connection](){
+        listener(connection);
+        //wyrejestracja
+    });*/
+}
+
+
 
 
 

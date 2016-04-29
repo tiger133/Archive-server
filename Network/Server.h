@@ -9,8 +9,10 @@
 #include <memory>
 #include "Connection.h"
 #include <thread>
+#include <netinet/in.h>
 #include "../utils/PipeFactory.h"
 
+using PipePair = Utils::PipePair;
 using OutputPipe = Utils::OutputPipe;
 using InputPipe = Utils::InputPipe;
 using PipeFactory = Utils::PipeFactory;
@@ -34,6 +36,8 @@ namespace Network
         std::thread * serverThread;
         std::function<void(std::shared_ptr<Connection>&)> listener;
         void run();
+
+        void createConnection(int desc, sockaddr_in in);
     };
 
 

@@ -18,9 +18,11 @@ namespace Network
     {
         std::shared_ptr<Socket> socket;
         std::shared_ptr<InputPipe> inputPipe;
-
     public:
-        Connection(Socket socket);
+        Connection(std::shared_ptr<Socket> sock,std::shared_ptr<InputPipe> input);
+
+
+
     };
 }
 
