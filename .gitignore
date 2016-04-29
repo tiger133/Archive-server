@@ -5,5 +5,5 @@ CMakeScripts
 Makefile
 cmake_install.cmake
 install_manifest.txt
-
+.idea
 # Created by .ignore support plugin (hsz.mobi)
