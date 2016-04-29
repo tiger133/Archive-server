@@ -11,12 +11,14 @@
 
 namespace Utils
 {
+    typedef std::pair<std::shared_ptr<InputPipe >, std::shared_ptr<OutputPipe >> PipePair;
 
     class PipeFactory {
         PipeFactory(){};
     public:
-        static std::pair<std::shared_ptr<InputPipe >, std::shared_ptr<OutputPipe >> createPipe();
+        static PipePair createPipe();
     };
+
 }
 
 

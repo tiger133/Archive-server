@@ -21,6 +21,14 @@ int Utils::OutputPipe::getDescriptor() const {
     return descriptor;
 }
 
+int Utils::OutputPipe::write(std::string msg) {
+    const char * buff = msg.c_str();
+    int len = (int)msg.length();
+    return write(buff,len);
+}
+
+
+
 
 
 

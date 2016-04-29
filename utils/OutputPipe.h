@@ -5,6 +5,7 @@
 #ifndef UNTITLED_OUTPUTPIPE_H
 #define UNTITLED_OUTPUTPIPE_H
 
+#include <string>
 #include <unistd.h>
 
 namespace Utils
@@ -15,6 +16,7 @@ namespace Utils
         int getDescriptor() const;
         OutputPipe(int outputPipeDesc);
         int write(const char * buffer, int size);
+        int write(std::string msg);
         int close();
     };
 }
