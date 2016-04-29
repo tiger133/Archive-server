@@ -9,12 +9,15 @@ namespace Network
 {
     class Socket
     {
+        int port;
+        int descriptor;
     public:
         Socket();
         void bind();
         void listen();
         void connect();
-
+        void close();
+        void setPort(int i);
     };
 
 }
