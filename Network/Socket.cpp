@@ -20,7 +20,7 @@ void Network::Socket::bind() {
     x.sin_addr.s_addr = htonl(INADDR_ANY);
     x.sin_port = htons((uint16_t)port);
 
-    if(bind(descriptor,(struct sockaddr*)&x,sizeof(x))!= 0)
+    if(::bind(descriptor,(struct sockaddr*)&x,sizeof(x))!= 0)
         throw std::runtime_error("Cannot bind the address");
 }
 
@@ -41,6 +41,13 @@ void Network::Socket::close() {
     if(::close(descriptor)!=0)
         throw std::runtime_error("Cannot close a socket");
 }
+
+Network::Socket::~Socket() {
+    if(::close(descriptor)!=0)
+        throw std::runtime_error("Cannot close a socket");
+}
+
+
 
 
 

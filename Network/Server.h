@@ -9,6 +9,11 @@
 #include <memory>
 #include "Connection.h"
 #include <thread>
+#include "../utils/PipeFactory.h"
+
+using OutputPipe = Utils::OutputPipe;
+using InputPipe = Utils::InputPipe;
+using PipeFactory = Utils::PipeFactory;
 
 namespace Network
 {
@@ -21,9 +26,13 @@ namespace Network
         void setConnectListener(std::function<void(std::shared_ptr<Connection>&)> connectListener);
         ~Server();
     private:
+        std::shared_ptr<InputPipe> inputPipe;
+        std::shared_ptr<OutputPipe> outputPipe;
+
+        Socket serverSocket;
         std::thread * serverThread;
         std::function<void(std::shared_ptr<Connection>&)> listener;
-        void run() const;
+        void run();
     };
 
 

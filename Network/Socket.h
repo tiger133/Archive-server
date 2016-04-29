@@ -18,6 +18,7 @@ namespace Network
         void connect();
         void close();
         void setPort(int i);
+        ~Socket();
     };
 
 }
