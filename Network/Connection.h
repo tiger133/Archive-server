@@ -9,7 +9,7 @@
 #include "Socket.h"
 #include "../utils/InputPipe.h"
 using InputPipe = Utils::InputPipe;
-
+using Socket = Network::Socket;
 
 
 namespace Network
@@ -19,8 +19,9 @@ namespace Network
         std::shared_ptr<Socket> socket;
         std::shared_ptr<InputPipe> inputPipe;
     public:
-        Connection(std::shared_ptr<Socket> sock,std::shared_ptr<InputPipe> input);
-
+        Connection(std::shared_ptr<Socket>& sock,std::shared_ptr<InputPipe>& input);
+        std::shared_ptr<Socket> getSocket() const;
+        std::shared_ptr<InputPipe> getInputPipe() const;
 
 
     };
