@@ -28,7 +28,7 @@ namespace Utils{
             mutex.lock();
             for(auto it = map.begin(); it!=map.end();it++)
             {
-                fun(*(it)->second);
+                fun(it->second);
             }
             mutex.unlock();
         }

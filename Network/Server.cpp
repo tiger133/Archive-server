@@ -27,9 +27,13 @@ void Network::Server::start() {
 
 
 void Network::Server::stop() {
-    char * buffer = new char[10];
-    buffer[0] = 'a';
-    outputPipe->write(buffer,1);
+
+    //closing client threads
+    map.foreach([] (std::shared_ptr<OutputPipe> p)->void {
+        p->write("close");
+    });
+    //closing acceptor thread
+    outputPipe->write("close");
 }
 
 
