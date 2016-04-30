@@ -13,6 +13,7 @@ namespace Utils
     public:
         int getDescriptor() const;
         InputPipe(int i);
+        InputPipe(InputPipe & second);
         int read(char * buffer, int size);
         int close(int x);
     };

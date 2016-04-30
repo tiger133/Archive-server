@@ -21,6 +21,12 @@ int Utils::InputPipe::getDescriptor() const {
     return descriptor;
 }
 
+Utils::InputPipe::InputPipe(InputPipe &second) {
+    descriptor = second.descriptor;
+}
+
+
+
 
 
 

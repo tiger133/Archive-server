@@ -27,6 +27,12 @@ int Utils::OutputPipe::write(std::string msg) {
     return write(buff,len);
 }
 
+Utils::OutputPipe::OutputPipe(OutputPipe &second) {
+    descriptor = second.descriptor;
+}
+
+
+
 
 
 
