@@ -10,6 +10,7 @@
 #include "Connection.h"
 #include <thread>
 #include <netinet/in.h>
+#include <vector>
 #include "../utils/PipeFactory.h"
 #include "../utils/ConcurrentMap.h"
 
@@ -35,6 +36,7 @@ namespace Network
 
         Socket serverSocket;
         std::thread * serverThread;
+        std::vector<std::shared_ptr<std::thread>> workingThreads;
         Utils::ConcurrentMap<int,std::shared_ptr<OutputPipe>> map;
         std::function<void(std::shared_ptr<Connection>&)> listener;
         void run();

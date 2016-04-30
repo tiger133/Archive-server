@@ -10,9 +10,14 @@ using CommandLine = View::CommandLine;
 
 int main() {
 
-    Server server(1252);
+    Server server(1258);
     server.setConnectListener([](std::shared_ptr<Connection>& x){
-        cout<<"Hello World" << endl;
+        for(int i = 0 ;i < 6; i++)
+        {
+            cout<<i<< endl;
+            sleep(1);
+        }
+
     });
 
     server.start();

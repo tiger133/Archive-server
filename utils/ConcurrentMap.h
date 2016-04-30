@@ -32,6 +32,14 @@ namespace Utils{
             }
             mutex.unlock();
         }
+        int size()
+        {
+            int result;
+            mutex.lock();
+            result = map.size();
+            mutex.unlock();
+            return result;
+        }
         void clear()
         {
             mutex.lock();
