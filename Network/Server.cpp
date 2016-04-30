@@ -97,16 +97,19 @@ Network::Server::~Server() {
 
 void Network::Server::createConnection(int desc, sockaddr_in in) {
 
-    PipePair p = PipeFactory::createPipe();
-   // Connection x(new Socket(desc,in),p.first);
-   // auto connection = new Connection(new Socket(desc,in),p.first);
+    PipePair pipes = PipeFactory::createPipe();
+    auto connection = new Connection(std::shared_ptr<Socket>(new Socket(desc,in)),pipes.first);
 
-    //Register
 
-   /* std::thread t([&connection](){
+    OutputPipe outputPipe = *(pipes.second);
+    std::pair<int,std::shared_ptr<OutputPipe>> pair(desc,pipes.second);
+    map.insert(pair);
+
+    /*std::thread t([&connection,&map](){
         listener(connection);
-        //wyrejestracja
+        map.erase(connection->getSocket()->getDescriptor());
     });*/
+
 }
 
 

@@ -11,12 +11,13 @@
 #include <thread>
 #include <netinet/in.h>
 #include "../utils/PipeFactory.h"
+#include "../utils/ConcurrentMap.h"
+
 
 using PipePair = Utils::PipePair;
 using OutputPipe = Utils::OutputPipe;
 using InputPipe = Utils::InputPipe;
 using PipeFactory = Utils::PipeFactory;
-
 
 namespace Network
 {
@@ -34,6 +35,7 @@ namespace Network
 
         Socket serverSocket;
         std::thread * serverThread;
+        Utils::ConcurrentMap<int,std::shared_ptr<OutputPipe>> map;
         std::function<void(std::shared_ptr<Connection>&)> listener;
         void run();
 
