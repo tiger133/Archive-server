@@ -27,7 +27,7 @@ namespace Network
         Server(int port);
         void start();
         void stop();
-        void setConnectListener(std::function<void(std::shared_ptr<Connection>&)> connectListener);
+        void setConnectListener(std::function<void(std::shared_ptr<Network::Connection>&)> connectListener);
         ~Server();
     private:
         std::shared_ptr<InputPipe> inputPipe;

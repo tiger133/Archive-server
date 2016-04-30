@@ -6,7 +6,7 @@
 #include <unistd.h>
 #include <cstring>
 #include <sys/socket.h>
-
+#include <type_traits>
 #include "Server.h"
 
 Network::Server::Server(int port) {
@@ -17,7 +17,7 @@ Network::Server::Server(int port) {
     serverSocket.bind();
     serverSocket.listen();
 }
-void Network::Server::setConnectListener(std::function<void(std::shared_ptr<Connection>&)> connectListener) {
+void Network::Server::setConnectListener(std::function<void(std::shared_ptr<Network::Connection>&)> connectListener) {
     listener = connectListener;
 }
 
@@ -98,17 +98,19 @@ Network::Server::~Server() {
 void Network::Server::createConnection(int desc, sockaddr_in in) {
 
     PipePair pipes = PipeFactory::createPipe();
-    auto connection = new Connection(std::shared_ptr<Socket>(new Socket(desc,in)),pipes.first);
+    Connection * connection = new Connection(std::shared_ptr<Socket>(new Socket(desc,in)),pipes.first);
+    std::shared_ptr<Connection> conPtr(connection);
 
 
-    OutputPipe outputPipe = *(pipes.second);
     std::pair<int,std::shared_ptr<OutputPipe>> pair(desc,pipes.second);
     map.insert(pair);
 
-    /*std::thread t([&connection,&map](){
-        listener(connection);
-        map.erase(connection->getSocket()->getDescriptor());
-    });*/
+    auto fun = std::bind([this,desc](std::shared_ptr<Connection> x) {
+        listener(x);
+        map.erase(desc);
+    },conPtr);
+
+    std::thread t(fun);
 
 }
 
