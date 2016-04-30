@@ -17,6 +17,13 @@ std::shared_ptr<InputPipe> Network::Connection::getInputPipe() const {
     return inputPipe;
 }
 
+Network::Connection::Connection(Connection &conn) {
+    socket = conn.getSocket();
+    inputPipe = conn.getInputPipe();
+}
+
+
+
 
 
 

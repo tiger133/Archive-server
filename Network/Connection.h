@@ -20,6 +20,7 @@ namespace Network
         std::shared_ptr<InputPipe> inputPipe;
     public:
         Connection(std::shared_ptr<Socket> sock, std::shared_ptr<InputPipe>& input);
+        Connection(Connection &conn);
         std::shared_ptr<Socket> getSocket() const;
         std::shared_ptr<InputPipe> getInputPipe() const;
 
