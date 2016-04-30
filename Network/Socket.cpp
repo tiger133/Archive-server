@@ -6,12 +6,21 @@
 #include <netinet/in.h>
 #include <stdexcept>
 #include <unistd.h>
+#include <sys/ioctl.h>
 #include "Socket.h"
 
 Network::Socket::Socket() {
     descriptor = socket(AF_INET,SOCK_STREAM,0);
-    if(descriptor == -1)
+    if(descriptor < 0)
         throw std::runtime_error("Cannot create socket");
+    int on = 1;
+    int result = setsockopt(descriptor,SOL_SOCKET,SO_REUSEADDR,(char*)&on,sizeof(on));
+    if(result < 0)
+        throw std::runtime_error("Cannot setsockopt");
+    result = ioctl(descriptor,FIONBIO,(char*)&on);
+    if(result < 0)
+        throw std::runtime_error("Cannot ioctl");
+
 }
 
 void Network::Socket::bind() {

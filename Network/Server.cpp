@@ -8,6 +8,7 @@
 #include <sys/socket.h>
 #include <type_traits>
 #include "Server.h"
+#include <errno.h>
 
 Network::Server::Server(int port) {
     std::pair<std::shared_ptr<InputPipe>, std::shared_ptr<OutputPipe>> pipes = PipeFactory::createPipe();
@@ -62,10 +63,10 @@ void Network::Server::run() {
         {
             if(FD_ISSET(i,&working_set))
             {
-                desc_ready = -1;
+                desc_ready -= 1;
                 if(i == inputPipe->getDescriptor())
                 {
-                    std::cout<<"Server is closing..."<< std::endl;
+
                     running = false;
                 }
                 if(i == serverSocket.getDescriptor())
@@ -76,12 +77,16 @@ void Network::Server::run() {
                         struct sockaddr_in  cli_addr;
                         bzero((char *) &cli_addr, sizeof(cli_addr));
 
-                        client_desc = accept(serverSocket.getDescriptor(), (struct sockaddr *) &cli_addr,
-                                             (socklen_t *) sizeof(cli_addr));
+                        client_desc = accept(serverSocket.getDescriptor(), NULL,
+                                             NULL);
                         if (client_desc < 0) {
-                            std::cout << "Accept failed" << std::endl;
+                            if(errno != EWOULDBLOCK)
+                            {
+                                std::cout<<"errno"<< std::endl;
+                                running = false;
+                            }
+                            break;
                         }
-
                         //We have a client descriptor so we can create a thread and start the logic.
                         createConnection(client_desc,cli_addr);
 
@@ -91,6 +96,7 @@ void Network::Server::run() {
             }
         }
     }
+    std::cout<<"Server is closing..."<< std::endl;
 
 
 }
@@ -115,7 +121,7 @@ void Network::Server::createConnection(int desc, sockaddr_in in) {
     },conPtr);
 
     std::thread t(fun);
-
+   t.join();
 }
 
 

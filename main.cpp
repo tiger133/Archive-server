@@ -12,7 +12,7 @@ int main() {
 
     Server server(1252);
     server.setConnectListener([](std::shared_ptr<Connection>& x){
-
+        cout<<"Hello World" << endl;
     });
 
     server.start();
