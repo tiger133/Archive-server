@@ -12,6 +12,17 @@ namespace Network {
     class TCP {
         Connection connection;
         int maxBlockSize;
+        enum ReceiveState
+        {
+            HEADER,
+            DATA,
+        } receiveState;
+        struct Header {
+            u_int64_t md51;
+            u_int64_t md52;
+            int length;
+            int flag;
+        };
     public:
         void setMaxBlockSize(int maxBlockSize) {
             TCP::maxBlockSize = maxBlockSize;

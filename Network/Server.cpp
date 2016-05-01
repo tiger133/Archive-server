@@ -118,11 +118,10 @@ void Network::Server::createConnection(int desc, sockaddr_in in) {
 
     std::pair<int,std::shared_ptr<OutputPipe>> pair(desc,pipes.second);
     map.insert(pair);
-    std::cout <<"map size"  << map.size() << std::endl;
+
     auto fun = std::bind([this,desc](std::shared_ptr<Connection> x) {
         listener(x);
         map.erase(desc);
-        std::cout <<"map size"  << map.size() << std::endl;
     },conPtr);
 
     std::shared_ptr<std::thread> t(new std::thread(fun));
