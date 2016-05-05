@@ -10,7 +10,62 @@ Network::TCP::TCP(Network::Connection x): connection(x) {
 }
 
 int Network::TCP::send(char *data, int size) {
+    fd_set master_writing_set;
+    fd_set master_reading_set;
+    fd_set writing_set;
+    fd_set reading_set;
+    FD_ZERO(&master_writing_set);
+    FD_ZERO(&master_reading_set);
+    FD_SET(connection.getInputPipe()->getDescriptor(), &master_reading_set);
+    FD_SET(connection.getSocket()->getDescriptor(), &master_writing_set);
+    int max_sd = std::max(connection.getInputPipe()->getDescriptor(), connection.getSocket()->getDescriptor());
 
+    bool running = true;
+    while(running) {
+        memcpy(&writing_set, &master_writing_set, sizeof(master_writing_set));
+        memcpy(&reading_set, &master_reading_set, sizeof(master_reading_set));
+        int result = select(max_sd + 1, &reading_set, &writing_set, NULL,(struct timeval*)0);
+        if(result < 0) {
+            std::cout << "Select Error" << std::endl;
+            break;
+        }
+
+        int desc_ready = result;
+        for(int i = 0 ; i <= max_sd && desc_ready > 0;++i) {
+            if(FD_ISSET(i, &reading_set)) {
+                desc_ready -= 1;
+                if(i == connection.getInputPipe()->getDescriptor()) {
+                    std::cout<<"closing client" << std::endl;
+                    running = false;
+                    break;
+                }
+            }
+            if(FD_ISSET(i, &writing_set)) {
+                desc_ready -= 1;
+                if(i == connection.getSocket()->getDescriptor()) {
+                    int frameSize = sizeof(Header)+size;
+
+                    std::cout<<"Sending..."<<std::endl;
+                    Header header = {1423423, 43245345, size, 0};
+                    char head[sizeof(Header)];
+                    memcpy(head, (char*)&header, sizeof(head));
+
+                    char frame[frameSize];
+                    for(int i = 0 ;i < frameSize + 1;i++)
+                        frame[i] = '\0';
+                    strcpy(frame, (char*)&header);
+                    strcat(frame, data);
+                    int result = connection.getSocket()->send(frame, frameSize, 0);
+                    if(result == frameSize)
+                    {
+                        std::cout<< frameSize <<" bytes sent." << std::endl;
+                        running = false;
+                        break;
+                    }
+                }
+            }
+        }
+    }
 
 }
 
