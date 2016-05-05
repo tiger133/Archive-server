@@ -47,7 +47,7 @@ int Network::TCP::send(std::shared_ptr<char> data, int size, int flag) {
                     int frameSize = sizeof(Header)+size;
 
                     std::cout<<"Sending..."<<std::endl;
-                    Header header = {0, 0, size, flag};
+                    Header header = {htonl(size), htonl(flag), htonl(0),htonl(0),htonl(0),htonl(0)};
                     char head[sizeof(Header)];
                     memcpy(head, (char*)&header, sizeof(head));
 
@@ -57,11 +57,7 @@ int Network::TCP::send(std::shared_ptr<char> data, int size, int flag) {
                     strcpy(frame, (char*)&header);
                     strcpy(frame+24, data.get());
 
-                    uint16_t * frameToSend = new uint16_t[frameSize];
-                    for(int i = 0; i < frameSize; i ++)
-                        frameToSend[i] = htons(frame[i]);
-
-                    int result = connection.getSocket()->send(frameToSend, (size_t)frameSize, 0);
+                    int result = connection.getSocket()->send(frame, (size_t)frameSize, 0);
                     if(result == frameSize)
                     {
                         std::cout<< frameSize <<" bytes sent." << std::endl;

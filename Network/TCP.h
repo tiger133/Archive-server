@@ -18,10 +18,12 @@ namespace Network {
             DATA,
         } receiveState;
         struct Header {
-            u_int64_t md51;
-            u_int64_t md52;
-            int length;
-            int flag;
+            uint32_t flag;
+            uint32_t length;
+            uint32_t md51;
+            uint32_t md52;
+            uint32_t md53;
+            uint32_t md54;
         };
     public:
         void setMaxBlockSize(int maxBlockSize) {
