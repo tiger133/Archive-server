@@ -10,7 +10,7 @@ Network::TCP::TCP(Network::Connection x): connection(x) {
     maxBlockSize = 4;
 }
 
-int Network::TCP::send(std::shared_ptr<char> data, int size, int flag) {
+int Network::TCP::sendFrame(std::shared_ptr<char> data, int size, int flag) {
     fd_set master_writing_set;
     fd_set master_reading_set;
     fd_set writing_set;
@@ -47,17 +47,15 @@ int Network::TCP::send(std::shared_ptr<char> data, int size, int flag) {
                     int frameSize = sizeof(Header)+size;
 
                     std::cout<<"Sending..."<<std::endl;
-                    Header header = {htonl(size), htonl(flag), htonl(0),htonl(0),htonl(0),htonl(0)};
+                    Header header = { htonl(flag),htonl(size), htonl(0),htonl(0),htonl(0),htonl(0)};
                     char head[sizeof(Header)];
                     memcpy(head, (char*)&header, sizeof(head));
 
                     char frame[frameSize];
-                    for(int i = 0 ;i < frameSize + 1;i++)
-                        frame[i] = '\0';
-                    strcpy(frame, (char*)&header);
-                    strcpy(frame+24, data.get());
-
+                    memcpy ( frame, (char*)&header ,sizeof(struct Header));
+                    memcpy (frame+24, data.get(),size);
                     int result = connection.getSocket()->send(frame, (size_t)frameSize, 0);
+
                     if(result == frameSize)
                     {
                         std::cout<< frameSize <<" bytes sent." << std::endl;
@@ -71,7 +69,7 @@ int Network::TCP::send(std::shared_ptr<char> data, int size, int flag) {
 
 }
 
-std::shared_ptr<char> Network::TCP::receive() {
+std::shared_ptr<char> Network::TCP::receiveFrame() {
 
     std::cout << "Receive ..." << std::endl;
 
@@ -121,13 +119,8 @@ std::shared_ptr<char> Network::TCP::receive() {
 
                             if (hp == sizeof(struct Header)) {
                                 receiveState = DATA;
-                                char * buffer2 = new char[sizeof(struct Header)];
-                                for(int i = 0; i< sizeof(struct Header);i++)
-                                {
-                                    buffer2[i] = ntohs(buffer[i]);
-                                }
-                                    //*(buffer+i) = ntohs(*(buffer+i));
-                                header = std::shared_ptr<struct Header>((struct Header *) buffer2);
+
+                                header = std::shared_ptr<struct Header>((struct Header *) buffer);
                                 std::cout<<header->length<<std::endl;
                                 data = new char[header->length+1];
                                 for(int i = 0 ;i < header->length + 1;i++)
@@ -169,7 +162,7 @@ int Network::TCP::send(std::shared_ptr<char> data, int size) {
         }
         frames++;
         std::shared_ptr<char> block(frame);
-        send(block, maxBlockSize, 0);
+        sendFrame(block, maxBlockSize, 0);
     }
     int rest = size - (frames * maxBlockSize);
     char *frame = new char[maxBlockSize];
@@ -178,10 +171,18 @@ int Network::TCP::send(std::shared_ptr<char> data, int size) {
         frame[i] = data.get()[i+frames*maxBlockSize];
     }
     std::shared_ptr<char> block(frame);
-    send(block, rest, 1);
+    sendFrame(block, rest, 1);
 
     return 0;
 }
+
+std::shared_ptr<char> Network::TCP::receive() {
+    std::shared_ptr<char> frame = receiveFrame();
+
+    return frame;
+}
+
+
 
 
 

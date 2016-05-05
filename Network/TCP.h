@@ -31,12 +31,11 @@ namespace Network {
         }
         TCP(Connection x);
     private:
-        int send(std::shared_ptr<char> data, int size, int flag);
+        int sendFrame(std::shared_ptr<char> data, int size, int flag);
+        std::shared_ptr<char> receiveFrame();
     public:
-        std::shared_ptr<char> receive();
-
         int send(std::shared_ptr<char> data, int size);
-
+        std::shared_ptr<char> receive();
 
     };
 }
