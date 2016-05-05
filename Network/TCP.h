@@ -28,8 +28,11 @@ namespace Network {
             TCP::maxBlockSize = maxBlockSize;
         }
         TCP(Connection x);
-        int send(char* data, int size);
+    private:
+        int send(std::shared_ptr<char> data, int size, int flag);
         std::shared_ptr<char> receive();
+    public:
+        int send(std::shared_ptr<char> data, int size);
 
 
     };

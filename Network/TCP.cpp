@@ -7,9 +7,10 @@
 #include "TCP.h"
 
 Network::TCP::TCP(Network::Connection x): connection(x) {
+    maxBlockSize = 4;
 }
 
-int Network::TCP::send(char *data, int size) {
+int Network::TCP::send(std::shared_ptr<char> data, int size, int flag) {
     fd_set master_writing_set;
     fd_set master_reading_set;
     fd_set writing_set;
@@ -46,7 +47,7 @@ int Network::TCP::send(char *data, int size) {
                     int frameSize = sizeof(Header)+size;
 
                     std::cout<<"Sending..."<<std::endl;
-                    Header header = {1423423, 43245345, size, 0};
+                    Header header = {0, 0, size, flag};
                     char head[sizeof(Header)];
                     memcpy(head, (char*)&header, sizeof(head));
 
@@ -54,8 +55,8 @@ int Network::TCP::send(char *data, int size) {
                     for(int i = 0 ;i < frameSize + 1;i++)
                         frame[i] = '\0';
                     strcpy(frame, (char*)&header);
-                    strcat(frame, data);
-                    int result = connection.getSocket()->send(frame, frameSize, 0);
+                    strcat(frame, data.get());
+                    int result = connection.getSocket()->send(frame, (size_t)frameSize, 0);
                     if(result == frameSize)
                     {
                         std::cout<< frameSize <<" bytes sent." << std::endl;
@@ -149,6 +150,37 @@ std::shared_ptr<char> Network::TCP::receive() {
 
     return std::shared_ptr<char>(data);
 }
+
+int Network::TCP::send(std::shared_ptr<char> data, int size) {
+    int frames = 0;
+    while(maxBlockSize < size - (frames * maxBlockSize))
+    {
+        char *frame = new char[maxBlockSize];
+        for(int i = 0; i < maxBlockSize; i ++)
+        {
+            frame[i]=data.get()[i+frames*maxBlockSize];
+        }
+        frames++;
+        std::shared_ptr<char> block(frame);
+        send(block, maxBlockSize, 0);
+    }
+    int rest = size - (frames * maxBlockSize);
+    char *frame = new char[maxBlockSize];
+    for(int i = 0; i < rest; i ++)
+    {
+        frame[i] = data.get()[i+frames*maxBlockSize];
+    }
+    std::shared_ptr<char> block(frame);
+    send(block, rest, 1);
+
+    return 0;
+}
+
+
+
+
+
+
 
 
 
