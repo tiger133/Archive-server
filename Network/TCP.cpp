@@ -55,8 +55,13 @@ int Network::TCP::send(std::shared_ptr<char> data, int size, int flag) {
                     for(int i = 0 ;i < frameSize + 1;i++)
                         frame[i] = '\0';
                     strcpy(frame, (char*)&header);
-                    strcat(frame, data.get());
-                    int result = connection.getSocket()->send(frame, (size_t)frameSize, 0);
+                    strcpy(frame+24, data.get());
+
+                    uint16_t * frameToSend = new uint16_t[frameSize];
+                    for(int i = 0; i < frameSize; i ++)
+                        frameToSend[i] = htons(frame[i]);
+
+                    int result = connection.getSocket()->send(frameToSend, (size_t)frameSize, 0);
                     if(result == frameSize)
                     {
                         std::cout<< frameSize <<" bytes sent." << std::endl;
@@ -120,8 +125,14 @@ std::shared_ptr<char> Network::TCP::receive() {
 
                             if (hp == sizeof(struct Header)) {
                                 receiveState = DATA;
-                                header = std::shared_ptr<struct Header>((struct Header *) buffer);
-
+                                char * buffer2 = new char[sizeof(struct Header)];
+                                for(int i = 0; i< sizeof(struct Header);i++)
+                                {
+                                    buffer2[i] = ntohs(buffer[i]);
+                                }
+                                    //*(buffer+i) = ntohs(*(buffer+i));
+                                header = std::shared_ptr<struct Header>((struct Header *) buffer2);
+                                std::cout<<header->length<<std::endl;
                                 data = new char[header->length+1];
                                 for(int i = 0 ;i < header->length + 1;i++)
                                     data[i] = '\0';

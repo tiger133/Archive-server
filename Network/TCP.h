@@ -30,8 +30,9 @@ namespace Network {
         TCP(Connection x);
     private:
         int send(std::shared_ptr<char> data, int size, int flag);
-        std::shared_ptr<char> receive();
     public:
+        std::shared_ptr<char> receive();
+
         int send(std::shared_ptr<char> data, int size);
 
 
