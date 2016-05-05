@@ -81,7 +81,7 @@ std::shared_ptr<char> Network::TCP::receiveFrame() {
     int max_sd = std::max(connection.getInputPipe()->getDescriptor(), connection.getSocket()->getDescriptor());
 
     char *buffer = new char [100];
-    std::shared_ptr<struct Header> header;
+    std::shared_ptr<struct Header> header(new struct Header);
     char *data;
 
     int hp = 0;
@@ -119,8 +119,13 @@ std::shared_ptr<char> Network::TCP::receiveFrame() {
 
                             if (hp == sizeof(struct Header)) {
                                 receiveState = DATA;
+                                header->flag = ntohl(((uint32_t *)buffer)[0]);
+                                header->length = ntohl(((uint32_t*)buffer)[1]);
+                                header->md51 = ntohl(((uint32_t*)buffer)[2]);
+                                header->md52 = ntohl(((uint32_t*)buffer)[3]);
+                                header->md53 = ntohl(((uint32_t*)buffer)[4]);
+                                header->md54 = ntohl(((uint32_t*)buffer)[5]);
 
-                                header = std::shared_ptr<struct Header>((struct Header *) buffer);
                                 std::cout<<header->length<<std::endl;
                                 data = new char[header->length+1];
                                 for(int i = 0 ;i < header->length + 1;i++)
@@ -178,7 +183,6 @@ int Network::TCP::send(std::shared_ptr<char> data, int size) {
 
 std::shared_ptr<char> Network::TCP::receive() {
     std::shared_ptr<char> frame = receiveFrame();
-
     return frame;
 }
 
