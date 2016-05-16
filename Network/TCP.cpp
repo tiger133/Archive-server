@@ -69,7 +69,25 @@ int Network::TCP::sendFrame(std::shared_ptr<char> data, int size, int flag) {
 
 }
 
-std::shared_ptr<char> Network::TCP::receiveFrame() {
+char* Network::TCP::receive(int n)
+{
+    char *buffer = new char [n];
+    int p = 0;
+    while(p<n) {
+        int res = (int) connection.getSocket()->recv(buffer + p, (size_t) n - p, 0);
+        if (res <= 0) {
+            std::cout << "Client disconected" << std::endl;
+            return nullptr;
+        }
+        p += res;
+
+        if (p == n)
+            return buffer;
+    }
+    return nullptr;
+}
+
+std::pair<std::shared_ptr<char>, std::shared_ptr<struct Network::TCP::Header>> Network::TCP::receiveFrame() {
 
     std::cout << "Receive ..." << std::endl;
 
@@ -80,13 +98,8 @@ std::shared_ptr<char> Network::TCP::receiveFrame() {
     FD_SET(connection.getSocket()->getDescriptor(), &master_set);
     int max_sd = std::max(connection.getInputPipe()->getDescriptor(), connection.getSocket()->getDescriptor());
 
-    char *buffer = new char [100];
     std::shared_ptr<struct Header> header(new struct Header);
-    char *data;
-
-    int hp = 0;
-    int dp = 0;
-    receiveState = HEADER;
+    char* data = new char[100];
 
     bool running = true;
     while(running) {
@@ -107,53 +120,30 @@ std::shared_ptr<char> Network::TCP::receiveFrame() {
                     break;
                 }
                 if(i == connection.getSocket()->getDescriptor()) {
-                    switch(receiveState) {
-                        case HEADER:{
-                            int res = (int) connection.getSocket()->recv(buffer + hp,
-                                                                         (size_t) sizeof(struct Header) - hp, 0);
-                            if (res <= 0) {
-                                running = false;
-                                break;
-                            }
-                            hp += res;
-
-                            if (hp == sizeof(struct Header)) {
-                                receiveState = DATA;
-                                header->flag = ntohl(((uint32_t *)buffer)[0]);
-                                header->length = ntohl(((uint32_t*)buffer)[1]);
-                                header->md51 = ntohl(((uint32_t*)buffer)[2]);
-                                header->md52 = ntohl(((uint32_t*)buffer)[3]);
-                                header->md53 = ntohl(((uint32_t*)buffer)[4]);
-                                header->md54 = ntohl(((uint32_t*)buffer)[5]);
-
-                                std::cout<<header->length<<std::endl;
-                                data = new char[header->length+1];
-                                for(int i = 0 ;i < header->length + 1;i++)
-                                    data[i] = '\0';
-                            }
-                            break;
-                            }
-                        case DATA: {
-                            int res = (int) connection.getSocket()->recv(data + dp, (size_t) header->length - dp, 0);
-                            if (res <= 0) {
-                                running = false;
-                                break;
-                            }
-                            dp += res;
-
-                            if (dp == header->length) {
-                                running = false;
-                                break;
-                            }
-                            break;
-                        }
+                    char *buffer = receive(sizeof(struct Header));
+                    if(buffer == nullptr)
+                    {
+                        running = false;
+                        break;
                     }
+                    header->flag = ntohl(((uint32_t *)buffer)[0]);
+                    header->length = ntohl(((uint32_t*)buffer)[1]);
+                    header->md51 = ntohl(((uint32_t*)buffer)[2]);
+                    header->md52 = ntohl(((uint32_t*)buffer)[3]);
+                    header->md53 = ntohl(((uint32_t*)buffer)[4]);
+                    header->md54 = ntohl(((uint32_t*)buffer)[5]);
+
+                    data = receive(header->length);
+                    std::cout<<std::endl<<header->length<<" bytes received."<<std::endl;
+                    running = false;
+                    break;
                 }
             }
         }
     }
 
-    return std::shared_ptr<char>(data);
+    return std::pair<std::shared_ptr<char>, std::shared_ptr<struct Network::TCP::Header>>
+            (std::shared_ptr<char>(data), header);
 }
 
 int Network::TCP::send(std::shared_ptr<char> data, int size) {
@@ -182,8 +172,21 @@ int Network::TCP::send(std::shared_ptr<char> data, int size) {
 }
 
 std::shared_ptr<char> Network::TCP::receive() {
-    std::shared_ptr<char> frame = receiveFrame();
-    return frame;
+    int flag = 0;
+    int size = 0;
+    char* data;
+    do {
+        std::pair<std::shared_ptr<char>, std::shared_ptr<struct Header>> frame = receiveFrame();
+        flag = frame.second->flag;
+        char* buffer = new char[size + frame.second->length];
+        memcpy(buffer, data, size);
+        memcpy(buffer + size, frame.first.get(), frame.second->length);
+        size += frame.second->length;
+        data = new char[size];
+        memcpy(data, buffer, size);
+    } while(flag==0);
+
+    return std::shared_ptr<char>(data);
 }
 
 
