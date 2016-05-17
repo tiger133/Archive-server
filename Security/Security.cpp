@@ -8,7 +8,7 @@
 Security::Security(Network::Connection x) : tcp(x) {
     CryptoPP::AutoSeededRandomPool prng;
 
-    privKey.GenerateRandomWithKeySize(prng, 64);
+    privKey.GenerateRandomWithKeySize(prng, MODULUS_SIZE);
     pubKey = CryptoPP::RSA::PublicKey(privKey);
     /*
     CryptoPP::Integer n("0xbeaadb3d839f3b5f"), e("0x11"), d("0x21a5ae37b9959db9");
@@ -107,50 +107,51 @@ int Security::send(std::shared_ptr<char> data, int size) {
 }
 
 std::shared_ptr<char> Security::receive() {
-    std::shared_ptr<char> data = tcp.receive();
-    int header = int(data.get()[0]);
+    std::string data = tcp.receive();
+    int header = int(data[0]);
 
     if(header == 0) { //client sent a request for public key
         CryptoPP::Integer modulus = pubKey.GetModulus();
         CryptoPP::Integer pub = pubKey.GetPublicExponent();
-        char *key1 = new char[2 + sizeof(modulus)];
-        char *key2 = new char[2 + sizeof(pub)];
+        char *key1 = new char[1 + MODULUS_SIZE/8];
+        char *key2 = new char[1 + MODULUS_SIZE/8];
 
-        std::stringstream ss;
-        ss << std::hex << modulus;
-        strcpy(key1, "1");
-        memcpy(key1 + 1, ss.str().c_str(), sizeof(modulus));
-        ss << std::hex << pub;
-        strcpy(key2, "1");
-        memcpy(key2 + 1, ss.str().c_str(), sizeof(pub));
+        //std::stringstream ss;
+        //ss << std::hex << modulus;
 
-        tcp.send(std::shared_ptr<char>(key1), sizeof(modulus) + 2);
-        tcp.send(std::shared_ptr<char>(key2), sizeof(pub) + 2);
+        key1[0]=1;
+        modulus.Encode((byte*)key1+1,MODULUS_SIZE/8);
+        key2[0]=1;
+        pub.Encode((byte*)key2+1,MODULUS_SIZE/8);
+
+        tcp.send(std::shared_ptr<char>(key1),1 + MODULUS_SIZE/8);
+        tcp.send(std::shared_ptr<char>(key2),1 + MODULUS_SIZE/8);
     }
     else if(header==2) { //client sent encrypted session key
         std::cout<<header<<std::endl;
-        char* key = new char[sizeof(data) - 1];
-        memcpy(key, data.get() + 1, sizeof(data) - 1);
-
         //decoding key
-        std::string message = key;
-        CryptoPP::Integer m((const byte *)message.data(), message.size());
+        CryptoPP::Integer m((const byte *)data.data()+1, data.size()-1);
         // Decryption
         CryptoPP::AutoSeededRandomPool prng;
         CryptoPP::Integer r = privKey.CalculateInverse(prng, m);
         std::cout << "r: " << std::hex << r << std::endl;
 
         // r: 736563726574h
-        std::string recovered;
-        recovered.resize(r.MinEncodedSize());
+       // std::string recovered;
+      //  recovered.resize(r.MinEncodedSize());
 
-        r.Encode((byte *)recovered.data(), recovered.size());
-        std::cout << "aesKey: " << recovered << std::endl;
+        r.Encode(aesKey, 32);
 
-        memcpy(aesKey, recovered.c_str(), 16);
+        //r.Encode((byte *)recovered.data(), recovered.size());
+        //std::cout << "aesKey: " << recovered << std::endl;
+
+
+
+
+        //memcpy(aesKey, recovered.c_str(), 32);
     }
     else if(header == 3) { //receving data
-        char* msg = new char[sizeof(data) - 1];
+     /*   char* msg = new char[sizeof(data) - 1];
         memcpy(msg, data.get() + 1, sizeof(data) - 1);
         std::string msg_string = msg;
         std::string encoded;
@@ -161,7 +162,7 @@ std::shared_ptr<char> Security::receive() {
         );
         std::cout << "cipher text: " << encoded << std::endl;
         std::string decrypted = decrypt(*aesKey, msg_string);
-        return std::shared_ptr<char>((char*)decrypted.c_str());
+        return std::shared_ptr<char>((char*)decrypted.c_str());*/
     }
 }
 

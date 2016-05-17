@@ -171,7 +171,7 @@ int Network::TCP::send(std::shared_ptr<char> data, int size) {
     return 0;
 }
 
-std::shared_ptr<char> Network::TCP::receive() {
+std::string Network::TCP::receive() {
     int flag = 0;
     int size = 0;
     char* data;
@@ -186,7 +186,7 @@ std::shared_ptr<char> Network::TCP::receive() {
         memcpy(data, buffer, size);
     } while(flag==0);
 
-    return std::shared_ptr<char>(data);
+    return std::string(data,size);
 }
 
 

@@ -15,6 +15,7 @@
 
 
 class Security {
+    const static int MODULUS_SIZE=512; //in bits
     CryptoPP::RSA::PrivateKey privKey;
     CryptoPP::RSA::PublicKey pubKey;
     byte *aesKey;

@@ -35,7 +35,7 @@ namespace Network {
         std::pair<std::shared_ptr<char>, std::shared_ptr<struct Header>> receiveFrame();
     public:
         int send(std::shared_ptr<char> data, int size);
-        std::shared_ptr<char> receive();
+        std::string receive();
 
         char* receive(int n);
     };
