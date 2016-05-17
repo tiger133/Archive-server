@@ -16,8 +16,8 @@ Security::Security(Network::Connection x) : tcp(x) {
     privKey.Initialize(n, e, d);
     pubKey.Initialize(n, e);
      */
-    aesKey = new byte[16];
-    for(int i = 0; i < 16; i++)
+    aesKey = new byte[32];
+    for(int i = 0; i < 32; i++)
     {
         aesKey[i] = 'a';
     }
@@ -49,7 +49,7 @@ std::string decrypt( unsigned char &key, std::string& cipher)
     try
     {
         CryptoPP::ECB_Mode< CryptoPP::AES >::Decryption d;
-        d.SetKey( &key, 16 );
+        d.SetKey(&key, 32);
 
         CryptoPP::StringSource( cipher, true,
                                 new CryptoPP::StreamTransformationFilter( d,
@@ -76,7 +76,7 @@ int Security::send(std::shared_ptr<char> data, int size) {
 
     try {
         CryptoPP::ECB_Mode< CryptoPP::AES >::Encryption e;
-        e.SetKey(aesKey, 16);
+        e.SetKey(aesKey, 32);
 
         ciphertext = encrypt(msg_string, e);
     }
@@ -151,18 +151,20 @@ std::shared_ptr<char> Security::receive() {
         //memcpy(aesKey, recovered.c_str(), 32);
     }
     else if(header == 3) { //receving data
-     /*   char* msg = new char[sizeof(data) - 1];
-        memcpy(msg, data.get() + 1, sizeof(data) - 1);
-        std::string msg_string = msg;
+      //  char* msg = new char[sizeof(data) - 1];
+      //  memcpy(msg, data.get() + 1, sizeof(data) - 1);
+        std::string msg_string(data.data()+1,data.size()-1);
         std::string encoded;
-        CryptoPP::StringSource( msg, true,
-                                new CryptoPP::HexEncoder(
-                                        new CryptoPP::StringSink( encoded )
-                                ) // HexEncoder
-        );
-        std::cout << "cipher text: " << encoded << std::endl;
+      //  CryptoPP::StringSource( msg, true,
+      //                          new CryptoPP::HexEncoder(
+      //                                  new CryptoPP::StringSink( encoded )
+      //                          ) // HexEncoder
+       // );
+     //   std::cout << "cipher text: " << encoded << std::endl;
+
         std::string decrypted = decrypt(*aesKey, msg_string);
-        return std::shared_ptr<char>((char*)decrypted.c_str());*/
+        std::cout<<decrypted;
+        return std::shared_ptr<char>((char*)decrypted.c_str());
     }
 }
 
