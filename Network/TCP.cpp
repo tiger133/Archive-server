@@ -7,7 +7,7 @@
 #include "TCP.h"
 
 Network::TCP::TCP(Network::Connection x): connection(x) {
-    maxBlockSize = 4;
+    maxBlockSize = 50;
 }
 
 int Network::TCP::sendFrame(std::shared_ptr<char> data, int size, int flag) {
