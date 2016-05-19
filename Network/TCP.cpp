@@ -76,8 +76,8 @@ char* Network::TCP::receive(int n)
     while(p<n) {
         int res = (int) connection.getSocket()->recv(buffer + p, (size_t) n - p, 0);
         if (res <= 0) {
-            std::cout << "Client disconected" << std::endl;
-            return nullptr;
+            std::cout << "Client disconnected" << std::endl;
+            throw "Client disconnected";
         }
         p += res;
 
@@ -120,7 +120,12 @@ std::pair<std::shared_ptr<char>, std::shared_ptr<struct Network::TCP::Header>> N
                     break;
                 }
                 if(i == connection.getSocket()->getDescriptor()) {
-                    char *buffer = receive(sizeof(struct Header));
+                    char * buffer;
+                    try {
+                        buffer = receive(sizeof(struct Header));
+                    } catch (const char* msg) {
+                        throw msg;
+                    }
                     if(buffer == nullptr)
                     {
                         running = false;
@@ -176,7 +181,12 @@ std::string Network::TCP::receive() {
     int size = 0;
     char* data;
     do {
-        std::pair<std::shared_ptr<char>, std::shared_ptr<struct Header>> frame = receiveFrame();
+        std::pair<std::shared_ptr<char>, std::shared_ptr<struct Header>> frame;
+        try {
+            frame = receiveFrame();
+        } catch (const char* msg) {
+            throw msg;
+        }
         flag = frame.second->flag;
         char* buffer = new char[size + frame.second->length];
         memcpy(buffer, data, size);
@@ -185,7 +195,6 @@ std::string Network::TCP::receive() {
         data = new char[size];
         memcpy(data, buffer, size);
     } while(flag==0);
-
     return std::string(data,size);
 }
 

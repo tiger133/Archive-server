@@ -16,11 +16,13 @@ Security::Security(Network::Connection x) : tcp(x) {
     privKey.Initialize(n, e, d);
     pubKey.Initialize(n, e);
      */
+
     aesKey = new byte[32];
     for(int i = 0; i < 32; i++)
     {
         aesKey[i] = 'a';
     }
+
 }
 
 std::string encrypt(std::string& plain, CryptoPP::ECB_Mode<CryptoPP::AES>::Encryption &cipher)
@@ -28,11 +30,10 @@ std::string encrypt(std::string& plain, CryptoPP::ECB_Mode<CryptoPP::AES>::Encry
     std::string c;
     try
     {
-        CryptoPP::StringSource( plain, true,
-                                new CryptoPP::StreamTransformationFilter( cipher,
-                                                                          new CryptoPP::StringSink( c )
-                                )
-        );
+        CryptoPP::StringSource
+                ( plain, true, new CryptoPP::StreamTransformationFilter
+                        ( cipher, new CryptoPP::StringSink( c ), CryptoPP::StreamTransformationFilter::NO_PADDING)
+                );
     }catch( CryptoPP::Exception& e )
     {
         std::cerr << e.what() << std::endl;
@@ -51,11 +52,14 @@ std::string decrypt( unsigned char &key, std::string& cipher)
         CryptoPP::ECB_Mode< CryptoPP::AES >::Decryption d;
         d.SetKey(&key, 32);
 
-        CryptoPP::StringSource( cipher, true,
-                                new CryptoPP::StreamTransformationFilter( d,
-                                                                          new CryptoPP::StringSink( recovered )
-                                )
-        );
+        CryptoPP::StringSource
+                ( cipher, true,
+                        (new CryptoPP::StreamTransformationFilter
+                                 ( d, new CryptoPP::StringSink( recovered ),
+                                   CryptoPP::StreamTransformationFilter::NO_PADDING
+                                 )
+                        )
+                );
 
         std::cout << "recovered text: " << recovered << std::endl;
     }
@@ -106,18 +110,21 @@ int Security::send(std::shared_ptr<char> data, int size) {
     tcp.send(std::shared_ptr<char>(toSend), withHeader.size());
 }
 
-std::shared_ptr<char> Security::receive() {
-    std::string data = tcp.receive();
+std::string Security::receive() {
+    std::string data;
+    try {
+        data = tcp.receive();
+    } catch (const char* msg) {
+        return nullptr;
+    }
     int header = int(data[0]);
+    std::cout<< header << std::endl;
 
     if(header == 0) { //client sent a request for public key
         CryptoPP::Integer modulus = pubKey.GetModulus();
         CryptoPP::Integer pub = pubKey.GetPublicExponent();
         char *key1 = new char[1 + MODULUS_SIZE/8];
         char *key2 = new char[1 + MODULUS_SIZE/8];
-
-        //std::stringstream ss;
-        //ss << std::hex << modulus;
 
         key1[0]=1;
         modulus.Encode((byte*)key1+1,MODULUS_SIZE/8);
@@ -128,7 +135,6 @@ std::shared_ptr<char> Security::receive() {
         tcp.send(std::shared_ptr<char>(key2),1 + MODULUS_SIZE/8);
     }
     else if(header==2) { //client sent encrypted session key
-        std::cout<<header<<std::endl;
         //decoding key
         CryptoPP::Integer m((const byte *)data.data()+1, data.size()-1);
         // Decryption
@@ -136,37 +142,17 @@ std::shared_ptr<char> Security::receive() {
         CryptoPP::Integer r = privKey.CalculateInverse(prng, m);
         std::cout << "r: " << std::hex << r << std::endl;
 
-        // r: 736563726574h
-       // std::string recovered;
-      //  recovered.resize(r.MinEncodedSize());
-
         r.Encode(aesKey, 32);
-
-        //r.Encode((byte *)recovered.data(), recovered.size());
-        //std::cout << "aesKey: " << recovered << std::endl;
-
-
-
-
-        //memcpy(aesKey, recovered.c_str(), 32);
     }
     else if(header == 3) { //receving data
-      //  char* msg = new char[sizeof(data) - 1];
-      //  memcpy(msg, data.get() + 1, sizeof(data) - 1);
         std::string msg_string(data.data()+1,data.size()-1);
-        std::string encoded;
-      //  CryptoPP::StringSource( msg, true,
-      //                          new CryptoPP::HexEncoder(
-      //                                  new CryptoPP::StringSink( encoded )
-      //                          ) // HexEncoder
-       // );
-     //   std::cout << "cipher text: " << encoded << std::endl;
 
         std::string decrypted = decrypt(*aesKey, msg_string);
-        std::cout<<decrypted;
-        return std::shared_ptr<char>((char*)decrypted.c_str());
+        std::cout<< "decrypted message: " << decrypted << std::endl;
+        return decrypted;
     }
 }
+
 
 
 

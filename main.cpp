@@ -11,15 +11,18 @@ using TCP = Network::TCP;
 
 int main() {
 
-    Server server(1266);
+    Server server(1268);
     server.setConnectListener([](std::shared_ptr<Connection>& x){
+        //TCP tcp(*x);
+        //std::cout << tcp.receive();
+
         Security security(*x);
 
-        security.receive();
-        security.receive();
-        security.receive();
-        security.receive();
-        security.receive();
+        std::cout << security.receive() << std::endl;
+        //security.receive();
+        //security.receive();
+        //security.receive();
+        //security.receive();
 
        // char *data = new char[6];
         //for(int i = 0 ;i < 6;i++)
