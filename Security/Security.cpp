@@ -32,7 +32,7 @@ std::string encrypt(std::string& plain, CryptoPP::ECB_Mode<CryptoPP::AES>::Encry
     {
         CryptoPP::StringSource
                 ( plain, true, new CryptoPP::StreamTransformationFilter
-                        ( cipher, new CryptoPP::StringSink( c ), CryptoPP::StreamTransformationFilter::NO_PADDING)
+                        ( cipher, new CryptoPP::StringSink( c ))
                 );
     }catch( CryptoPP::Exception& e )
     {
@@ -47,24 +47,18 @@ std::string encrypt(std::string& plain, CryptoPP::ECB_Mode<CryptoPP::AES>::Encry
 std::string decrypt( unsigned char &key, std::string& cipher)
 {
     std::string recovered;
-    try
-    {
+    try {
         CryptoPP::ECB_Mode< CryptoPP::AES >::Decryption d;
         d.SetKey(&key, 32);
 
         CryptoPP::StringSource
-                ( cipher, true,
+                (cipher, true,
                         (new CryptoPP::StreamTransformationFilter
-                                 ( d, new CryptoPP::StringSink( recovered ),
-                                   CryptoPP::StreamTransformationFilter::NO_PADDING
-                                 )
-                        )
-                );
-
+                                 (d, new CryptoPP::StringSink(recovered),
+                                   CryptoPP::StreamTransformationFilter::NO_PADDING)));
         std::cout << "recovered text: " << recovered << std::endl;
-    }
-    catch( CryptoPP::Exception& e )
-    {
+
+    }  catch( CryptoPP::Exception& e ) {
         std::cerr << e.what() << std::endl;
         exit(1);
     }
