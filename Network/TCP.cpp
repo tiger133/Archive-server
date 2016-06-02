@@ -58,7 +58,7 @@ int Network::TCP::sendFrame(std::shared_ptr<char> data, int size, int flag) {
 
                     if(result == frameSize)
                     {
-                        std::cout<< frameSize <<" bytes sent." << std::endl;
+                        std::cout<< size <<" bytes sent." << std::endl;
                         running = false;
                         break;
                     }

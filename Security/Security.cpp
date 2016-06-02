@@ -65,18 +65,18 @@ std::string decrypt( unsigned char &key, std::string& cipher)
     return recovered;
 }
 
-int Security::send(std::shared_ptr<char> data, int size) {
+int Security::send(std::string data, int size) {
     if(aesKey == nullptr)
         return -1; // error, session key wasn't established yet
-    std::string msg_string = data.get();
-    std::cout<<msg_string<<std::endl;
+/*
+    std::cout<<data<<std::endl;
     std::string ciphertext;
 
     try {
         CryptoPP::ECB_Mode< CryptoPP::AES >::Encryption e;
         e.SetKey(aesKey, 32);
 
-        ciphertext = encrypt(msg_string, e);
+        ciphertext = encrypt(data, e);
     }
     catch( CryptoPP::Exception& e )
     {
@@ -84,22 +84,17 @@ int Security::send(std::shared_ptr<char> data, int size) {
         exit(1);
     }
 
-    //
-    // Dump Cipher Text
-    //
-    std::cout << "Cipher Text (" << ciphertext.size() << " bytes)" << std::endl;
-
-    for( int i = 0; i < ciphertext.size(); i++ ) {
-        std::cout << "0x" << std::hex << (0xFF & static_cast<byte>(ciphertext[i])) << " ";
-    }
     std::cout << std::endl << std::endl;
     std::cout<<ciphertext<<std::endl;
-    std::string withHeader = "3" + ciphertext;
+*/
+
+    //std::string withHeader = "3" + ciphertext;
+    std::string withHeader = "3" + data; //wersja bez szyfrowania !!!!!!!!!!!!!!!
+    withHeader[0]=3;
     char* toSend = new char[withHeader.size()];
     memcpy(toSend, withHeader.c_str(), withHeader.size());
 
     std::cout<< toSend << std::endl;
-    std::cout<< withHeader.size() << std::endl;
 
     tcp.send(std::shared_ptr<char>(toSend), withHeader.size());
 }
@@ -115,6 +110,7 @@ std::string Security::receive() {
     std::cout<< header << std::endl;
 
     if(header == 0) { //client sent a request for public key
+        std::cout<< "Sending public key..." << std::endl;
         CryptoPP::Integer modulus = pubKey.GetModulus();
         CryptoPP::Integer pub = pubKey.GetPublicExponent();
         char *key1 = new char[1 + MODULUS_SIZE/8];
@@ -129,21 +125,22 @@ std::string Security::receive() {
         tcp.send(std::shared_ptr<char>(key2),1 + MODULUS_SIZE/8);
     }
     else if(header==2) { //client sent encrypted session key
+        std::cout<< "Session key received." << std::endl;
         //decoding key
         CryptoPP::Integer m((const byte *)data.data()+1, data.size()-1);
         // Decryption
         CryptoPP::AutoSeededRandomPool prng;
         CryptoPP::Integer r = privKey.CalculateInverse(prng, m);
-        std::cout << "r: " << std::hex << r << std::endl;
 
         r.Encode(aesKey, 32);
     }
     else if(header == 3) { //receving data
         std::string msg_string(data.data()+1,data.size()-1);
 
-        std::string decrypted = decrypt(*aesKey, msg_string);
-        std::cout<< "decrypted message: " << decrypted << std::endl;
-        return decrypted;
+        //std::string decrypted = decrypt(*aesKey, msg_string);
+        //std::cout<< "decrypted message: " << decrypted << std::endl;
+        //return decrypted;
+        return msg_string; //!!! without decryption
     }
 }
 

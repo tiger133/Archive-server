@@ -22,7 +22,7 @@ class Security {
     Network::TCP tcp;
 public:
     Security(Network::Connection x);
-    int send(std::shared_ptr<char> data, int size);
+    int send(std::string data, int size);
     std::string receive();
 };
 
