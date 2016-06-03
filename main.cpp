@@ -15,11 +15,11 @@ using TCP = Network::TCP;
 
 int main() {
 
-    Server server(1263);
+    Server server(1264);
     server.setConnectListener([](std::shared_ptr<Connection>& x){
         Logic* logic = new Logic(*x);
-        //logic->logIn();
-        logic->receiveFile();
+        //logic->receiveFile("hello");
+
     //    TCP tcp(*x);
     //    std::cout << tcp.receive();
 /*

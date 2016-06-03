@@ -17,13 +17,32 @@
 class Model {
     std::string path;
     sql::Connection *con;
+    std::string userName="piotr";
+    std::string fileName="example2.txt";
+    std::string device="komputer";
+    int timestamp;
 public:
     Model();
     ~Model();
+    void setUserName(std::string userName) {
+        this->userName = userName;
+    }
+    void setDevice(const std::string &device) {
+        Model::device = device;
+    }
+
+    void setTimestamp(int timestamp) {
+        Model::timestamp = timestamp;
+    }
+
+    void setFileName(const std::string &fileName) {
+        Model::fileName = fileName;
+    }
     void addUser(std::string name, std::string passHash);
     bool findByUsername(std::string name);
-
-    void saveFile(std::string content, int size);
+    std::string getPassword(std::string username);
+    void saveFile(std::string content);
+    bool isActive(std::string username);
 };
 
 

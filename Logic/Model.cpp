@@ -24,12 +24,9 @@ Model::Model() {
         stmt = con->createStatement();
         res = stmt->executeQuery("SELECT * from user");
         while (res->next()) {
-            cout << "\t... MySQL replies: ";
+            cout << "\tusername: ";
             /* Access column data by alias or column name */
             cout << res->getString("username") << endl;
-            cout << "\t... MySQL says it again: ";
-            /* Access column fata by numeric offset, 1 is the first column */
-            cout << res->getString(2) << endl;
         }
     } catch (sql::SQLException &e) {
         cout << "# ERR: SQLException in " << __FILE__;
@@ -65,16 +62,67 @@ bool Model::findByUsername(std::string name) {
     return false;
 }
 
-void Model::saveFile(std::string content, int size) {
+void Model::saveFile(std::string content) {
     std::cout<<"saving file"<<std::endl;
-    std::string filePath = path+"asia5.txt";
-    std::cout<<filePath<<std::endl;
+    sql::PreparedStatement *prep_stmt;
+
+    prep_stmt = con->prepareStatement("SELECT fileSize from file join user on file.userId = user.id where username = ?");
+    prep_stmt->setString(1, userName);
+    sql::ResultSet *res = prep_stmt->executeQuery();
+    int fileSize;
+    if(res->next()) {
+        fileSize = res->getInt("fileSize");
+    }
+    else {
+        std::cout<< "error" << std::endl;
+        return;
+    }
+    delete prep_stmt;
+
+
+    std::string filePath = path+userName+"/"+device;
+    std::string command = "mkdir -p "+filePath;
+    system(command.data());
+
+    std::cout<<"filePath: "<<filePath<<std::endl;
     std::ofstream myfile;
-    myfile.open(filePath);
-    myfile << content;
+    myfile.open(filePath+"/"+fileName, std::fstream::app);
+    myfile.write(content.data(), content.size());
     myfile.close();
     std::cout<<"saved"<<std::endl;
 }
+
+std::string Model::getPassword(std::string username) {
+    sql::PreparedStatement *prep_stmt;
+
+    prep_stmt = con->prepareStatement("SELECT * from user where username = ?");
+    prep_stmt->setString(1, username);
+    sql::ResultSet *res = prep_stmt->executeQuery();
+    if(res->next()) {
+        delete prep_stmt;
+        return res->getString("password");
+    }
+    delete prep_stmt;
+    return NULL;
+}
+
+bool Model::isActive(std::string username) {
+    sql::PreparedStatement *prep_stmt;
+
+    prep_stmt = con->prepareStatement("SELECT * from user where username = ?");
+    prep_stmt->setString(1, username);
+    sql::ResultSet *res = prep_stmt->executeQuery();
+    if(res->next()) {
+        delete prep_stmt;
+        return res->getBoolean("active");
+    }
+    delete prep_stmt;
+    return false;
+}
+
+
+
+
 
 
 

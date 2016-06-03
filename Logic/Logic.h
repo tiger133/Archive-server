@@ -8,6 +8,7 @@
 
 #include "../Security/Security.h"
 #include "Model.h"
+#include <string>
 
 class Logic {
 
@@ -18,15 +19,18 @@ class Logic {
         LOGGED
     } state;
     Security security;
-    Model *model;
+
 public:
+    Model *model;
     Logic(Network::Connection x);
     void start();
     void receive();
     int logIn();
     void logOut();
-    void sendChallenge();
-    void receiveFile(std::string content, int size);
+    std::string sendChallenge();
+    void receiveFile(std::string content);
+    void receiveFileRequest(std::string content);
+    std::string md5(std::string x);
 };
 
 
