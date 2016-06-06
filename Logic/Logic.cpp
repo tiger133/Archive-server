@@ -43,7 +43,7 @@ void Logic::receive() {
 
 int Logic::logIn() {
     std::string msg = security.receive();
-    if(msg.at(0) != 1)
+    if(msg.at(0) != 0)
         std::runtime_error ("Expected username");
 
     std::string username(msg.data()+1,msg.size()-1);
@@ -99,8 +99,8 @@ std::string Logic::sendChallenge() {
             challenge += hex[rand() % length];
         }
     std::cout<<challenge<<std::endl;
-    std::string withHeader = "1" +challenge;
-    security.send(challenge, 9);
+    std::string withHeader = "\001" +challenge;
+    security.send(withHeader, 9);
     return challenge;
 }
 
@@ -148,19 +148,13 @@ void Logic::logOut() {
 }
 
 std::string Logic::md5(std::string message) {
-    byte digest[ CryptoPP::Weak::MD5::DIGESTSIZE ];
+    byte const* pbData = (byte*) message.data();
+    unsigned int nDataLen = message.size();
+    byte abDigest[CryptoPP::Weak::MD5::DIGESTSIZE];
 
-    CryptoPP::Weak::MD5 hash;
-    hash.CalculateDigest( digest, (const byte*)message.c_str(), message.length() );
+    CryptoPP::Weak::MD5().CalculateDigest(abDigest, pbData, nDataLen);
 
-    CryptoPP::HexEncoder encoder;
-    std::string output;
-
-    encoder.Attach( new CryptoPP::StringSink( output ) );
-    encoder.Put( digest, sizeof(digest) );
-    encoder.MessageEnd();
-
-    return output;
+    return std::string((char*)abDigest);
 }
 
 
