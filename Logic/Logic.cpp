@@ -55,10 +55,13 @@ int Logic::logIn() {
         std::string hash = model->getPassword(username) + challenge;
         std::string md5string = md5(hash);
         std::string response(msg.data()+1,msg.size()-1);
-        if(strcmp(md5string.data(), response.data())) {
+        if(response.compare(md5string)==0) {
             if(model->isActive(username)) {
                 state = LOGGED;
                 model->setUserName(username);
+                std::string msg;
+                msg.push_back(3);
+                security.send(msg, 1);
             }
             else {
                 std::cout<<"User account has not been activated."<<std::endl;
@@ -90,15 +93,12 @@ int Logic::logIn() {
 }
 
 std::string Logic::sendChallenge() {
-    static const char hex[] = "0123456789ABCDEF";
-    int length = sizeof(hex) - 1;
-
     srand(time(0));
-    std::string challenge;
+    std::string challenge(8,0);
         for(unsigned int i = 0; i < 8; ++i) {
-            challenge += hex[rand() % length];
+            challenge[i] = rand() % 256;
         }
-    std::cout<<challenge<<std::endl;
+    std::cout<<challenge<<std::endl;//another errors
     std::string withHeader = "\001" +challenge;
     security.send(withHeader, 9);
     return challenge;
@@ -154,7 +154,7 @@ std::string Logic::md5(std::string message) {
 
     CryptoPP::Weak::MD5().CalculateDigest(abDigest, pbData, nDataLen);
 
-    return std::string((char*)abDigest);
+    return std::string((char*)abDigest,CryptoPP::Weak::MD5::DIGESTSIZE);
 }
 
 
