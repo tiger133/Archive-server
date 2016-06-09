@@ -4,8 +4,6 @@
 #define CRYPTOPP_ENABLE_NAMESPACE_WEAK 1
 
 #include "Logic.h"
-#include "Model.h"
-#include "cryptopp/md5.h"
 
 Logic::Logic(Network::Connection x) : security(x) {
     state = DISCONNECTED;
@@ -109,38 +107,34 @@ void Logic::receiveFile(std::string content) {
 }
 
 void Logic::receiveFileRequest(std::string content) {
-    char* msg = (char*)content.data();
-    std::string fileName = "";
-    std::string device = "";
-    std::string tmp = "";
-    int i = 0;
-    while(msg[i]!='\0') {
-        fileName += msg[i];
-        i++;
+    std::vector<std::string> data;
+    std::string tmp;
+    for(int i = 0; i < content.size(); i++) {
+        if(content[i] == '\0' && !tmp.empty()) {
+            data.push_back(tmp);
+            tmp.clear();
+        }
     }
-    i++;
-    while(msg[i]!='\0') {
-        device += msg[i];
-        i++;
+    model->setFileName(data.at(0));
+    model->setDevice(data.at(1));
+    model->setTimestamp(data.at(3));
+    //findFile
+    bool found = 0;
+    //file already exists
+    if(found) {
+        std::string msg;
+        msg.push_back('8');
+        msg.push_back('0');
+        security.send(msg, 2);
     }
-    std::cout<<fileName <<", "<<device <<std::endl;
-    i++;
-    while(msg[i]!='\0') {
-        tmp += msg[i];
-        i++;
+    else {
+        int n = 0; //nr bajtu
+        std::string msg;
+        msg.push_back(8);
+        msg.push_back(0);
+        msg+=n;
+        security.send(msg, msg.size());
     }
-    //int32_t size = (int32_t*)tmp.data();
-    tmp = "";
-    i++;
-    while(msg[i]!='\0') {
-        tmp += msg[i];
-        i++;
-    }
-    //int32_t timestamp = int32_t(tmp.data());
-    model->setFileName(fileName);
-    model->setDevice(device);
-    //model->setTimestamp(timestamp);
-
 }
 
 void Logic::logOut() {

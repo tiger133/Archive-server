@@ -20,22 +20,22 @@ class Model {
     std::string userName="piotr";
     std::string fileName="example2.txt";
     std::string device="komputer";
-    int timestamp;
+    std::string timestamp;
 public:
     Model();
     ~Model();
     void setUserName(std::string userName) {
         this->userName = userName;
     }
-    void setDevice(const std::string &device) {
+    void setDevice(std::string device) {
         Model::device = device;
     }
 
-    void setTimestamp(int timestamp) {
+    void setTimestamp(std::string timestamp) {
         Model::timestamp = timestamp;
     }
 
-    void setFileName(const std::string &fileName) {
+    void setFileName(std::string fileName) {
         Model::fileName = fileName;
     }
     void addUser(std::string name, std::string passHash);

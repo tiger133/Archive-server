@@ -9,6 +9,8 @@
 #include "../Security/Security.h"
 #include "Model.h"
 #include <string>
+#include <vector>
+#include "cryptopp/md5.h"
 
 class Logic {
 
