@@ -106,19 +106,30 @@ void Logic::receiveFile(std::string content) {
 }
 
 void Logic::receiveFileRequest(std::string content) {
-    std::vector<std::string> data;
-    std::string tmp;
-    for(int i = 0; i < content.size(); i++) {
-        if(content[i] == '\0' && !tmp.empty()) {
-            data.push_back(tmp);
-            tmp.clear();
-        }
+    char* msg = (char*)content.data();
+    std::string fileName = "";
+    std::string device = "";
+    int i = 0;
+    while(msg[i]!='\0') {
+        fileName += msg[i];
+        i++;
     }
-    model->setFileName(data.at(0));
-    model->setDevice(data.at(1));
-    int size = std::stoi(data.at(2));
+    i++;
+    while(msg[i]!='\0') {
+        device += msg[i];
+        i++;}
+
+    std::cout<<fileName <<", "<<device <<std::endl;
+    i++;
+    int32_t size =*((int*)(msg+i));
+    size=ntohl(size);
+    int32_t timestamp = *((int*)(msg+i+4));
+    timestamp=ntohl(timestamp);
+    
+    model->setFileName(fileName);
+    model->setDevice(device);
     model->setFileSize(size);
-    model->setTimestamp(data.at(3));
+    model->setTimestamp(std::to_string(timestamp));
     if(!model->findFile()) {
         model->addFile();
     }
@@ -126,6 +137,9 @@ void Logic::receiveFileRequest(std::string content) {
     {
         std::string msg;
         msg.push_back(7);
+        msg.push_back(0);
+        msg.push_back(0);
+        msg.push_back(0);
         msg.push_back(0);
         security.send(msg, 2);
     }
@@ -140,10 +154,36 @@ void Logic::receiveFileRequest(std::string content) {
         else { // jest już taki plik ale nie w całości, zgoda na przesyłanie
             std::string msg;
             msg.push_back(7);
-            msg += n;
+            msg += (char)n>>24;
+            msg += (char)n>>16;
+            msg += (char)n>>8;
+            msg += (char)n;
             security.send(msg, msg.size());
         }
     }
+
+}
+
+void Logic::receiveFileRequest(std::string content) {
+   
+
+   // model->setFileName(data.at(0));
+  // std::cout << data[0]<<std::endl;
+  // std::cout << data[1]<<std::endl;
+   // model->setDevice(data.at(1));
+   // int size = ntohl(std::stoi(data.at(2)));
+   // std::cout <<size<<std::endl;
+   // std::cout <<data[3]<<std::endl;
+   std::cout << size;
+   std::cout << timestamp;
+   std::to_string(timestamp);
+  //  model->setFileSize(size);
+  //  model->setTimestamp(data.at(3));
+    if(1) //nie ma takiej wersji pliku, zgoda na przesyłanie
+    {
+        
+    }
+    
 
 }
 
