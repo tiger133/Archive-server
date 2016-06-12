@@ -1,7 +1,6 @@
 //
 // Created by joanna on 27.05.16.
 //
-#define CRYPTOPP_ENABLE_NAMESPACE_WEAK 1
 
 #include "Logic.h"
 
@@ -117,24 +116,35 @@ void Logic::receiveFileRequest(std::string content) {
     }
     model->setFileName(data.at(0));
     model->setDevice(data.at(1));
+    int size = std::stoi(data.at(2));
+    model->setFileSize(size);
     model->setTimestamp(data.at(3));
-    //findFile
-    bool found = 0;
-    //file already exists
-    if(found) {
+    if(!model->findFile()) {
+        model->addFile();
+    }
+    if(model->findFileVersionSize() == -1) //nie ma takiej wersji pliku, zgoda na przesyłanie
+    {
         std::string msg;
-        msg.push_back('8');
-        msg.push_back('0');
+        msg.push_back(7);
+        msg.push_back(0);
         security.send(msg, 2);
     }
     else {
-        int n = 0; //nr bajtu
-        std::string msg;
-        msg.push_back(8);
-        msg.push_back(0);
-        msg+=n;
-        security.send(msg, msg.size());
+        int n = model->findFileVersionSize();
+        if(n == size) { // jest już taki plik i cały został przesłany, odmowa przesłania
+            std::string msg;
+            msg.push_back(8);
+            msg.push_back(0);
+            security.send(msg, 2);
+        }
+        else { // jest już taki plik ale nie w całości, zgoda na przesyłanie
+            std::string msg;
+            msg.push_back(7);
+            msg += n;
+            security.send(msg, msg.size());
+        }
     }
+
 }
 
 void Logic::logOut() {

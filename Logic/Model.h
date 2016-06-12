@@ -18,9 +18,10 @@ class Model {
     std::string path;
     sql::Connection *con;
     std::string userName="piotr";
-    std::string fileName="example2.txt";
+    std::string fileName="example3.txt";
     std::string device="komputer";
-    std::string timestamp;
+    std::string timestamp = "2016-06-01 00:00:00";
+    int fileSize;
 public:
     Model();
     ~Model();
@@ -38,11 +39,18 @@ public:
     void setFileName(std::string fileName) {
         Model::fileName = fileName;
     }
+    void setFileSize(int fileSize) {
+        Model::fileSize = fileSize;
+    }
     void addUser(std::string name, std::string passHash);
     bool findByUsername(std::string name);
     std::string getPassword(std::string username);
     void saveFile(std::string content);
     bool isActive(std::string username);
+    bool findFile();
+    int findFileVersionSize();
+
+    void addFile();
 };
 
 

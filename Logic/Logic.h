@@ -4,7 +4,7 @@
 
 #ifndef UNTITLED_CONTROLLER_H
 #define UNTITLED_CONTROLLER_H
-
+#define CRYPTOPP_ENABLE_NAMESPACE_WEAK 1
 
 #include "../Security/Security.h"
 #include "Model.h"

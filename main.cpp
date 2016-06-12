@@ -15,9 +15,13 @@ using TCP = Network::TCP;
 
 int main() {
 
-    Server server(1264);
+    Server server(1265);
     server.setConnectListener([](std::shared_ptr<Connection>& x){
-        Logic* logic = new Logic(*x);
+        //Logic* logic = new Logic(*x);
+
+        Model* model = new Model();
+        model->addFile();
+        model->saveFile("dzien dobry");
         //logic->receiveFile("hello");
 
     //    TCP tcp(*x);
