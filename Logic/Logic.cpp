@@ -129,7 +129,7 @@ void Logic::receiveFileRequest(std::string content) {
     model->setFileName(fileName);
     model->setDevice(device);
     model->setFileSize(size);
-    model->setTimestamp(std::to_string(timestamp));
+    model->setTimestamp(timestamp);
     if(!model->findFile()) {
         model->addFile();
     }
