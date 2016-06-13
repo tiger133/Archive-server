@@ -33,6 +33,8 @@ public:
     void receiveFile(std::string content);
     void receiveFileRequest(std::string content);
     std::string md5(std::string x);
+
+    void establishSecureConnection();
 };
 
 

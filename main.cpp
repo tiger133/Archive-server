@@ -17,11 +17,12 @@ int main() {
 
     Server server(1265);
     server.setConnectListener([](std::shared_ptr<Connection>& x){
-        //Logic* logic = new Logic(*x);
-
-        Model* model = new Model();
-        model->addFile();
-        model->saveFile("dzien dobry");
+        Logic* logic = new Logic(*x);
+        logic->receive();
+        logic->receive();
+        logic->receive();
+        logic->receive();
+        logic->receive();
         //logic->receiveFile("hello");
 
     //    TCP tcp(*x);

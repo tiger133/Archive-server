@@ -87,7 +87,7 @@ void Model::saveFile(std::string content) {
     prep_stmt->setInt(1, fileSize + content.size());
     prep_stmt->setInt(2, fileId);
     prep_stmt->setDateTime(3, timestamp);
-    prep_stmt->executeQuery();
+    prep_stmt->execute();
 
 
     std::string filePath = path+userName+"/"+device;
@@ -187,7 +187,7 @@ void Model::addFile() {
     prep_stmt->setInt(2, id);
     prep_stmt->setInt(3, fileSize);
     prep_stmt->setString(4, device);
-    std::cout<< prep_stmt->executeUpdate() << endl;
+    std::cout<< prep_stmt->execute() << endl;
 
     prep_stmt = con->prepareStatement("SELECT * from file where file_name = ? and "
                                               "user_id =? and file_size = ? and device_name = ?");
@@ -208,7 +208,7 @@ void Model::addFile() {
     prep_stmt = con->prepareStatement("INSERT into file_version (file_id, timestamp, received_data_size) VALUES (?,?,0) ");
     prep_stmt->setInt(1, fileId);
     prep_stmt->setString(2, timestamp);
-    res = prep_stmt->executeQuery();
+    prep_stmt->execute();
     delete prep_stmt;
 
 }

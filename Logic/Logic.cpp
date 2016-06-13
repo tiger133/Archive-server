@@ -13,7 +13,7 @@ void Logic::start() {
     while(true) {
         switch(state) {
             case DISCONNECTED:
-                logIn();
+                establishSecureConnection();
                 break;
             case CONNECTED:
                 logIn();
@@ -164,28 +164,6 @@ void Logic::receiveFileRequest(std::string content) {
 
 }
 
-void Logic::receiveFileRequest(std::string content) {
-   
-
-   // model->setFileName(data.at(0));
-  // std::cout << data[0]<<std::endl;
-  // std::cout << data[1]<<std::endl;
-   // model->setDevice(data.at(1));
-   // int size = ntohl(std::stoi(data.at(2)));
-   // std::cout <<size<<std::endl;
-   // std::cout <<data[3]<<std::endl;
-   std::cout << size;
-   std::cout << timestamp;
-   std::to_string(timestamp);
-  //  model->setFileSize(size);
-  //  model->setTimestamp(data.at(3));
-    if(1) //nie ma takiej wersji pliku, zgoda na przesyłanie
-    {
-        
-    }
-    
-
-}
 
 void Logic::logOut() {
 
@@ -200,6 +178,14 @@ std::string Logic::md5(std::string message) {
 
     return std::string((char*)abDigest,CryptoPP::Weak::MD5::DIGESTSIZE);
 }
+
+void Logic::establishSecureConnection() {
+    security.receive();
+    security.receive();
+    state = CONNECTED;
+}
+
+
 
 
 
