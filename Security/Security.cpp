@@ -10,18 +10,8 @@ Security::Security(Network::Connection x) : tcp(x) {
 
     privKey.GenerateRandomWithKeySize(prng, MODULUS_SIZE);
     pubKey = CryptoPP::RSA::PublicKey(privKey);
-    /*
-    CryptoPP::Integer n("0xbeaadb3d839f3b5f"), e("0x11"), d("0x21a5ae37b9959db9");
-
-    privKey.Initialize(n, e, d);
-    pubKey.Initialize(n, e);
-     */
 
     aesKey = new byte[32];
-    for(int i = 0; i < 32; i++)
-    {
-        aesKey[i] = 'a';
-    }
 
 }
 
@@ -68,7 +58,7 @@ std::string decrypt( unsigned char &key, std::string& cipher)
 int Security::send(std::string data, int size) {
     if(aesKey == nullptr)
         return -1; // error, session key wasn't established yet
-/*
+
     std::cout<<data<<std::endl;
     std::string ciphertext;
 
@@ -86,10 +76,10 @@ int Security::send(std::string data, int size) {
 
     std::cout << std::endl << std::endl;
     std::cout<<ciphertext<<std::endl;
-*/
 
-    //std::string withHeader = "3" + ciphertext;
-    std::string withHeader = "3" + data; //wersja bez szyfrowania !!!!!!!!!!!!!!!
+
+    std::string withHeader = "3" + ciphertext;
+    //std::string withHeader = "3" + data; //wersja bez szyfrowania !!!!!!!!!!!!!!!
     withHeader[0]=3;
     char* toSend = new char[withHeader.size()];
     memcpy(toSend, withHeader.c_str(), withHeader.size());
@@ -137,10 +127,9 @@ std::string Security::receive() {
     else if(header == 3) { //receving data
         std::string msg_string(data.data()+1,data.size()-1);
 
-        //std::string decrypted = decrypt(*aesKey, msg_string);
-        //std::cout<< "decrypted message: " << decrypted << std::endl;
-        //return decrypted;
-        return msg_string; //!!! without decryption
+        std::string decrypted = decrypt(*aesKey, msg_string);
+        std::cout<< "decrypted message: " << decrypted << std::endl;
+        return decrypted;
     }
 }
 
