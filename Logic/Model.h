@@ -32,10 +32,17 @@ public:
         Model::device = device;
     }
 
-    void setTimestamp(std::string timestamp) {
-        Model::timestamp = timestamp;
+    void setTimestamp(int timestamp) {
+    time_t     now;
+    struct tm  ts;
+    char       buf[80];
+    // Format time, "ddd yyyy-mm-dd hh:mm:ss zzz"
+    time_t times=timestamp;
+    ts = *gmtime( &times);
+    strftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S\0", &ts);
+    //printf("%s\n", buf);
+    Model::timestamp = std::string(buf);
     }
-
     void setFileName(std::string fileName) {
         Model::fileName = fileName;
     }
